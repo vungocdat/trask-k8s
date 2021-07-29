@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logreader-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logreader
+  template:
+    metadata:
+      labels:
+        app: logreader
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: logreader
+          image: quay.io/vungocdat/logreader
+          resources: {}
