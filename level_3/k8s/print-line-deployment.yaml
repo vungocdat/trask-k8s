@@ -9,11 +9,10 @@ spec:
       component: web
   template:
     metadata:
+      name: print-line
       labels:
         component: web
     spec:
       containers:
-        - name: print-line
-          image: quay.io/vungocdat/print-line
-          ports:
-            - containerPort: 3000
+        - name: print-line-container
+          image: quay.io/vungocdat/print-line:1.1
