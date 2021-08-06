@@ -4,6 +4,6 @@ while :
 do
 
 	shuf -n 1 level3file.txt
-	sleep 2;
+	sleep 5000;
 
 done

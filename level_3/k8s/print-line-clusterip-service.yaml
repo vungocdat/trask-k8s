@@ -1,14 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: print-line-service
+  name: print-line-clusterip-service
   labels:
     component: printline
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
     - targetPort: 80
       port: 80
-      nodePort: 30003
   selector:
     component: printline

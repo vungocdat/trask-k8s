@@ -1,0 +1,45 @@
+spusteni nginx
+	-> k run nginx --image=nginx	|	k delete pod nginx
+	-> yaml file:
+
+		apiVersion: v1
+		kind: Pod
+		metadata:
+			name: nginx
+		spec:
+			containers:
+				- name: web
+				  imgae: nginx
+				  ports:
+				  	- name: web
+					  containerPort: 80
+					  protocol: TCP
+-------------------------------------------------------------------------------
+
+naskalovat na 3 repliky
+	-> apiVersion: app/v1
+	   kind: Deployment
+	   metadata: 
+	     name: nginx-deployment
+	   spec:
+	     replicas: 3
+		 selector:
+		   matchlabels:
+		     web: nginx
+		 template:
+		   metadata:
+		     lables:
+			   web: nginx
+		   spec:
+		     containers:
+			   - name: nginx
+			     image: nginx
+
+-------------------------------------------------------------------------------
+
+zobrazit pody tohoto deploymentu vcetne IP adresy a nodu
+	-> k get pods -o wide
+
+-------------------------------------------------------------------------------
+
+

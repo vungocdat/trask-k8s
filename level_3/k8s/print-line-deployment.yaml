@@ -2,17 +2,21 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: print-line-deployment
+  labels:
+    component: printline
 spec:
   replicas: 1
   selector:
     matchLabels:
-      component: web
+      component: printline
   template:
     metadata:
-      name: print-line
+      name: printline
       labels:
-        component: web
+        component: printline
     spec:
       containers:
         - name: print-line-container
-          image: quay.io/vungocdat/print-line:1.1
+          image: quay.io/vungocdat/print-line:v1.2
+          ports:
+            - containerPort: 80
