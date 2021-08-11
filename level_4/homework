@@ -1,5 +1,5 @@
 spusteni nginx
-	-> k run nginx --image=nginx	|	k delete pod nginx
+	-> k rsun nginx --image=nginx	|	k delete pod nginx
 	-> yaml file:
 
 		apiVersion: v1
@@ -35,6 +35,9 @@ naskalovat na 3 repliky
 			   - name: nginx
 			     image: nginx
 
+	-> replicaset
+	-> replica controller
+
 -------------------------------------------------------------------------------
 
 zobrazit pody tohoto deploymentu vcetne IP adresy a nodu
@@ -42,4 +45,73 @@ zobrazit pody tohoto deploymentu vcetne IP adresy a nodu
 
 -------------------------------------------------------------------------------
 
+zobrazit jmeno podu a image (pod nginx)
+	-> k get pod -o custom-columns=JMENO:.metadata.name,IMAGE:.spec.containers[0].image
 
+-------------------------------------------------------------------------------
+
+switch na novejsi verzi
+	-> apiVersion: v1
+	   kind: Pod
+	   metadata:
+	     name: nginx
+	   spec:
+	     containers:
+		   - name: nginx
+		     image: nginx:mainline
+
+-------------------------------------------------------------------------------
+
+nastavit ENV promennou NGINX_INSTANCE=nginx1
+	-> apiVersion: v1
+	   kind: Pod
+	   metadata:
+	     name: nginx
+	   spec:
+	     containers:
+		   - name: nginx
+		     image: nginx
+			 env:
+			   - name NGINX_INSTANCE
+			     value: nginx1
+
+-------------------------------------------------------------------------------
+
+restartovat nginx
+	-> k rollout restart deployment/nginx
+
+-------------------------------------------------------------------------------
+
+vytvorit deployment a service pro nginx
+
+	-> deployment:
+	     apiVersion: apps/v1
+		 kind: Deployment
+		 metadata:
+		   name: nginx-deployment
+		 spec:
+		   selector:
+		     matchLabels:
+			   web: nginx
+		   replicas: 1
+		   template:
+		     metadata:
+			   name: nginx
+			   labels:
+			     web: nginx
+			 spec:
+			   containers:
+			     - name: nginx-pod
+				   image: nginx
+
+	-> service:
+	     apiVersion: v1
+		 kind: Service
+		 metadata:
+		   name: nginx-svc
+		 spec:
+		   selector:
+		     web: nginx
+		   ports:
+		     - targetPort: 80
+			   port: 80

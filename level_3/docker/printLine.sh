@@ -1,9 +1,5 @@
-#!/bin/sh
+#!/bin/bash
 
 while :
-do
-
-	shuf -n 1 level3file.txt
-	sleep 5000;
-
+do { echo -e 'HTTP/1.1 200 OK\r\n'; shuf -n 1 level3file.txt; } | nc -l 8080; 
 done

@@ -17,6 +17,6 @@ spec:
     spec:
       containers:
         - name: print-line-container
-          image: quay.io/vungocdat/print-line:v1.2
+          image: quay.io/vungocdat/print-line:v1.4.1
           ports:
-            - containerPort: 80
+            - containerPort: 8080
