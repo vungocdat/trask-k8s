@@ -1,117 +1,169 @@
 spusteni nginx
-	-> k rsun nginx --image=nginx	|	k delete pod nginx
-	-> yaml file:
+  -> k run nginx --image=nginx
+  -> yaml file:
 
-		apiVersion: v1
-		kind: Pod
-		metadata:
-			name: nginx
-		spec:
-			containers:
-				- name: web
-				  imgae: nginx
-				  ports:
-				  	- name: web
-					  containerPort: 80
-					  protocol: TCP
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: nginx
+    spec:
+      containers:
+        - name: web
+          imgae: nginx
+          ports:
+            - name: web
+            containerPort: 80
+            protocol: TCP
 -------------------------------------------------------------------------------
 
 naskalovat na 3 repliky
-	-> apiVersion: app/v1
-	   kind: Deployment
-	   metadata: 
-	     name: nginx-deployment
-	   spec:
-	     replicas: 3
-		 selector:
-		   matchlabels:
-		     web: nginx
-		 template:
-		   metadata:
-		     lables:
-			   web: nginx
-		   spec:
-		     containers:
-			   - name: nginx
-			     image: nginx
+  -> apiVersion: app/v1
+     kind: Deployment
+     metadata: 
+       name: nginx-deployment
+     spec:
+       replicas: 3
+     selector:
+       matchlabels:
+         web: nginx
+     template:
+       metadata:
+         lables:
+         web: nginx
+       spec:
+         containers:
+         - name: nginx
+           image: nginx
 
-	-> replicaset
-	-> replica controller
+  -> replicaset
+  -> replica controller
+  -> imperative command:
+       k scale deployment nginx --replicas=5
 
 -------------------------------------------------------------------------------
 
 zobrazit pody tohoto deploymentu vcetne IP adresy a nodu
-	-> k get pods -o wide
+  -> k get pods -o wide
 
 -------------------------------------------------------------------------------
 
 zobrazit jmeno podu a image (pod nginx)
-	-> k get pod -o custom-columns=JMENO:.metadata.name,IMAGE:.spec.containers[0].image
+  -> k get pod -o custom-columns=JMENO:.metadata.name,IMAGE:.spec.containers[0].image
 
 -------------------------------------------------------------------------------
 
 switch na novejsi verzi
-	-> apiVersion: v1
-	   kind: Pod
-	   metadata:
-	     name: nginx
-	   spec:
-	     containers:
-		   - name: nginx
-		     image: nginx:mainline
+  -> apiVersion: v1
+     kind: Pod
+     metadata:
+       name: nginx
+     spec:
+       containers:
+       - name: nginx
+         image: nginx:mainline
 
 -------------------------------------------------------------------------------
 
 nastavit ENV promennou NGINX_INSTANCE=nginx1
-	-> apiVersion: v1
-	   kind: Pod
-	   metadata:
-	     name: nginx
-	   spec:
-	     containers:
-		   - name: nginx
-		     image: nginx
-			 env:
-			   - name NGINX_INSTANCE
-			     value: nginx1
+  -> apiVersion: v1
+     kind: Pod
+     metadata:
+       name: nginx
+     spec:
+       containers:
+       - name: nginx
+         image: nginx
+       env:
+         - name NGINX_INSTANCE
+           value: nginx1
 
 -------------------------------------------------------------------------------
 
+vytvorit secret "nginx" data: username - nginx, password - heslo
+  -> k create secret generic nginx --from-literal=username=nginx --from-literal=password=heslo
+  -> apiVersion: v1
+     kind: Secret
+     metadata:
+       name: nginx
+     data:
+       username: nginx
+       password: heslo
+
+-------------------------------------------------------------------------------
+
+vypsat hodnotu z pole "password" z tohoto secretu v plain textu
+    -> k get secret/nginx -o yaml
+    -> echo aGVzbG8K | base64 --decode
+
+-------------------------------------------------------------------------------
+
+vypsat hodnotu z pole "password" z tohoto secretu v plain textu
+    -> envFrom:
+       - secretRef:
+           name: nginx
+
+    -> volumes:
+       - name: secret-nginx
+         secret:
+           secretName: nginx
+
+-------------------------------------------------------------------------------
 restartovat nginx
-	-> k rollout restart deployment/nginx
+  -> k rollout restart deployment/nginx
 
 -------------------------------------------------------------------------------
 
-vytvorit deployment a service pro nginx
+vytvorit deployment, service a config map pro nginx
 
-	-> deployment:
-	     apiVersion: apps/v1
-		 kind: Deployment
-		 metadata:
-		   name: nginx-deployment
-		 spec:
-		   selector:
-		     matchLabels:
-			   web: nginx
-		   replicas: 1
-		   template:
-		     metadata:
-			   name: nginx
-			   labels:
-			     web: nginx
-			 spec:
-			   containers:
-			     - name: nginx-pod
-				   image: nginx
+  -> deployment:
+       apiVersion: apps/v1
+     kind: Deployment
+     metadata:
+       name: nginx-deployment
+     spec:
+       selector:
+         matchLabels:
+         web: nginx
+       replicas: 1
+       template:
+         metadata:
+         name: nginx
+         labels:
+           web: nginx
+       spec:
+         containers:
+           - name: nginx-pod
+           image: nginx
+           envFrom:
+             - configMapRef:
+               name: nginx-configmap
 
-	-> service:
-	     apiVersion: v1
-		 kind: Service
-		 metadata:
-		   name: nginx-svc
-		 spec:
-		   selector:
-		     web: nginx
-		   ports:
-		     - targetPort: 80
-			   port: 80
+  -> service:
+     apiVersion: v1
+     kind: Service
+     metadata:
+       name: nginx-svc
+     spec:
+       selector:
+         web: nginx
+       ports:
+         - targetPort: 80
+         port: 80
+
+  -> config map:
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: nginx-configmap
+    data:
+      web: nginx
+
+-------------------------------------------------------------------------------
+
+zobrazit jednom prikazem vsechno:
+  -> kubectl get all
+
+-------------------------------------------------------------------------------
+
+smazat vsechno
+  -> mit yaml soubory v jednom adresari: k delete -f "jmeno_adresare"
