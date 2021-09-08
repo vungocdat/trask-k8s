@@ -1,0 +1,8 @@
+namespaces:
+k create namespace alice
+k create namespace bob
+k create namespace developers
+
+creating csr:
+openssl req -new -newkey rsa:1024 -keyout alice.pem -nodes -out - -subj "/CN=alice/O=developers" 2>/dev/null | base64 -w0 > alice.csr
+openssl req -new -newkey rsa:1024 -keyout bob.pem -nodes -out - -subj "/CN=bob/O=developers" 2>/dev/null | base64 -w0 > bob.csr
