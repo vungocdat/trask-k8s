@@ -1,0 +1,3 @@
+  kubectl config set-credentials dat-sa --token $(kubectl get secret $(kubectl get sa dat-sa -o jsonpath='{.secrets[0].name}') -o jsonpath='{.data.token}' | base64 -d)
+  kubectl config set-context dat-sa --cluster minikube --user dat-sa
+  kubectl config use-context dat-sa
