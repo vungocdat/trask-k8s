@@ -19,3 +19,12 @@ spec:
       containers:
       - name: redis-container
         image: redis
+  volumeClaimTemplates:
+  - metadata:
+      name: redis-vct
+    spec:
+      accessModes: [ "ReadWriteMany" ]
+      storageClassName: "local-path"
+      resources:
+        requests:
+          storage: 1Gi
