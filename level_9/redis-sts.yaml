@@ -21,10 +21,10 @@ spec:
         image: redis
   volumeClaimTemplates:
   - metadata:
-      name: redis-vct
+      name: elasticsearch-data # Do not change this name unless you set up a volume mount for the data path.
     spec:
-      accessModes: [ "ReadWriteMany" ]
-      storageClassName: "local-path"
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "storage-class"
       resources:
         requests:
-          storage: 1Gi
+          storage: 50Mi
