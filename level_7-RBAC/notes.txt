@@ -1,8 +1,59 @@
-namespaces:
-k create namespace alice
-k create namespace bob
-k create namespace developers
+CREATE NAMESPACES:
+k create ns bob
+k create ns alice
+k create ns developers
 
-creating csr:
+
+CREATING CSR
 openssl req -new -newkey rsa:1024 -keyout alice.pem -nodes -out - -subj "/CN=alice/O=developers" 2>/dev/null | base64 -w0 > alice.csr
+
 openssl req -new -newkey rsa:1024 -keyout bob.pem -nodes -out - -subj "/CN=bob/O=developers" 2>/dev/null | base64 -w0 > bob.csr
+
+cat <<EOF | kubectl create -f -
+apiVersion: certificates.k8s.io/v1
+kind: CertificateSigningRequest
+metadata:
+  name: alice
+spec:
+  request: $(cat alice.csr)
+  signerName: kubernetes.io/kube-apiserver-client
+  usages:
+  - client auth
+EOF
+
+cat <<EOF | kubectl create -f -
+apiVersion: certificates.k8s.io/v1
+kind: CertificateSigningRequest
+metadata:
+  name: bob
+spec:
+  request: $(cat bob.csr)
+  signerName: kubernetes.io/kube-apiserver-client
+  usages:
+  - client auth
+EOF
+
+
+APPROVE CSR
+k certificate approve alice
+k certificate approve bob
+
+
+CREATE ROLEBINDING FOR NAMESPACES
+k create rolebinding alice-admin -n alice --clusterrole=admin --user=alice
+k create rolebinding bob-admin -n bob --clusterrole=admin --user=bob
+
+
+create kubectl contexts in kcfg file for bob and alice
+export KUBECONFIG=./kcfg
+k config set-cluster alice --server $(KUBECONFIG=./config kubectl config view --minify | yq e '.clusters[0].cluster.server' - )
+
+error:
+jq: error: authority/0 is not defined at <top-level>, line 1:
+.clusters[0].cluster.certificate-authority-data
+jq: error: data/0 is not defined at <top-level>, line 1:
+.clusters[0].cluster.certificate-authority-data
+jq: 2 compile errors
+Cluster "alice" set.
+
+
