@@ -46,14 +46,6 @@ k create rolebinding bob-admin -n bob --clusterrole=admin --user=bob
 
 create kubectl contexts in kcfg file for bob and alice
 export KUBECONFIG=./kcfg
-k config set-cluster alice --server $(KUBECONFIG=./config kubectl config view --minify | yq e '.clusters[0].cluster.server' - )
-
-error:
-jq: error: authority/0 is not defined at <top-level>, line 1:
-.clusters[0].cluster.certificate-authority-data
-jq: error: data/0 is not defined at <top-level>, line 1:
-.clusters[0].cluster.certificate-authority-data
-jq: 2 compile errors
-Cluster "alice" set.
-
+k config set-cluster alice --server $(KUBECONFIG= kubectl config view --minify | yq e '.clusters[0].cluster.server' - )
+k config set-cluster alice --embed-certs --certificate-authority <(KUBECONFIG=../../dvu/config kubectl config view --minify --raw | yq e '.clusters[0].cluster.certificate-authority-data' - | base64 -d)
 
