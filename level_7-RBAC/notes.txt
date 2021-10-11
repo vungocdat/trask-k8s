@@ -46,6 +46,7 @@ k create rolebinding bob-admin -n bob --clusterrole=admin --user=bob
 
 create kubectl contexts in kcfg file for bob and alice
 export KUBECONFIG=./kcfg
-k config set-cluster alice --server $(KUBECONFIG= kubectl config view --minify | yq e '.clusters[0].cluster.server' - )
-k config set-cluster alice --embed-certs --certificate-authority <(KUBECONFIG=../../dvu/config kubectl config view --minify --raw | yq e '.clusters[0].cluster.certificate-authority-data' - | base64 -d)
-
+k config set-cluster alice --server $(KUBECONFIG=________ kubectl config view --minify | yq e '.clusters[0].cluster.server' - )
+k config set-cluster alice --embed-certs --certificate-authority <(KUBECONFIG=________ kubectl config view --minify --raw | yq e '.clusters[0].cluster.certificate-authority-data' - | base64 -d)
+k config set-credentials alice --embed-certs --client-key alice.pem --client-certificate <(KUBECONFIG=________ kubectl get csr alice -o jsonpath='{.status.certificate}' | base64 -d)
+k config set-context alice --cluster alice --user alice --namespace=alice
