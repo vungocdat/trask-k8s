@@ -50,3 +50,13 @@ k config set-cluster alice --server $(KUBECONFIG=________ kubectl config view --
 k config set-cluster alice --embed-certs --certificate-authority <(KUBECONFIG=________ kubectl config view --minify --raw | yq e '.clusters[0].cluster.certificate-authority-data' - | base64 -d)
 k config set-credentials alice --embed-certs --client-key alice.pem --client-certificate <(KUBECONFIG=________ kubectl get csr alice -o jsonpath='{.status.certificate}' | base64 -d)
 k config set-context alice --cluster alice --user alice --namespace=alice
+
+k config use-context alice
+
+
+show certificate
+k get csr alice -o jsonpath='{.status.certificate}' | base64 -d | openssl x509 -in - -text -noout
+
+
+the same do for bob
+make sure that csr(s) are still there
