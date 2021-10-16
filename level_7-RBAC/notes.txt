@@ -60,3 +60,49 @@ k get csr alice -o jsonpath='{.status.certificate}' | base64 -d | openssl x509 -
 
 the same do for bob
 make sure that csr(s) are still there
+
+
+group developers have R/W rights in namespace developers
+kubectl create rolebinding developers-edit -n developers --clusterrole=edit --group=developers
+
+
+alice and bob have R/O in namespace bob/alice
+kubectl create rolebinding alice-view -n bob   --clusterrole=view --user=alice
+kubectl create rolebinding bob-view   -n alice --clusterrole=view --user=bob
+
+
+R/W rights on configMaps
+kubectl create clusterrole configmap-edit --resource=configMap --verb=create,delete,deletecollection,patch,update
+kubectl create rolebinding alice-edit-cm -n bob   --clusterrole=configmap-edit --user=alice
+kubectl create rolebinding bob-edit-cm   -n alice --clusterrole=configmap-edit --user=bob
+
+
+create a service account "audit" in default namespace with R/O in whole cluster
+kubectl create sa audit -n default
+kubectl create clusterrolebinding audit --clusterrole=view --serviceaccount=default:audit
+
+
+create a service account "monitor" in default namespace with R/O right in "bob"
+and "alice" and "developer" namespaces
+kubectl create sa monitor -n default
+kubectl create rolebinding monitor -n alice --clusterrole=view --serviceaccount=default:monitor
+kubectl create rolebinding monitor -n bob --clusterrole=view --serviceaccount=default:monitor
+kubectl create rolebinding monitor -n developers --clusterrole=view --serviceaccount=default:monitor
+
+
+set context "monitor" and "audit"
+export KUBECONFIG=./kcfg
+
+aliases
+alias kc="kubectl --kubeconfig `pwd`/config"
+alias kxa="kubectl --kubeconfig `pwd`/kcfg --context alice"
+alias kxb="kubectl --kubeconfig `pwd`/kcfg --context bob"
+alias kxmon="kubectl --kubeconfig `pwd`/kcfg --context monitor"
+alias kxaud="kubectl --kubeconfig `pwd`/kcfg --context audit"
+alias kxadm="kubectl --kubeconfig `pwd`/kcfg --context admin"
+
+kubectl config set-cluster monitor --server $(kc config view --minify | yq e '.clusters[0].cluster.server' - )
+kubectl config set-cluster audit   --server $(kc config view --minify | yq e '.clusters[0].cluster.server' - )
+
+kubectl config set-cluster monitor --embed-certs --certificate-authority <(kc config view --minify --raw | yq e '.clusters[0].cluster.certificate-authority-data' - | base64 -d)
+kubectl config set-cluster audit   --embed-certs --certificate-authority <(kc config view --minify --raw | yq e '.clusters[0].cluster.certificate-authority-data' - | base64 -d)
