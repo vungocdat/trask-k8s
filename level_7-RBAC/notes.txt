@@ -106,3 +106,10 @@ kubectl config set-cluster audit   --server $(kc config view --minify | yq e '.c
 
 kubectl config set-cluster monitor --embed-certs --certificate-authority <(kc config view --minify --raw | yq e '.clusters[0].cluster.certificate-authority-data' - | base64 -d)
 kubectl config set-cluster audit   --embed-certs --certificate-authority <(kc config view --minify --raw | yq e '.clusters[0].cluster.certificate-authority-data' - | base64 -d)
+
+kubectl get secret
+kubectl describe secret ___
+kubectl config set-credentials monitor --token ____
+kubectl config set-credentials audit --token ____
+kubectl config set-context monitor --cluster monitor --user monitor
+kubectl config set-context audit --cluster audit --user audit
